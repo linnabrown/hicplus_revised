@@ -1,84 +1,89 @@
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import os
+import random
 
-
-def readSparseMatrix(filename, total_length):
-    print ("reading Rao's HiC ")
+def readFiles(filename, total_length, resolution, delimiter):
+    print("reading HiC input data")
     infile = open(filename).readlines()
-    print (len(infile))
-    HiC = np.zeros((total_length,total_length)).astype(np.int16)
+    if len(infile[1].split(",")) == 3:
+        res = readSparseMatrix(infile, total_length, resolution, delimiter)
+        np.savetxt(filename+'square.txt', res, delimiter = delimiter, fmt = '%d')
+    else:
+        res = readSquareMatrix(infile, total_length, delimiter)
+    return res
+
+def readSparseMatrix(infile, total_length, resolution, delimiter):
+    #print "reading Rao's HiC "
+    #infile = open(filename).readlines()
+    #print len(infile)
+    HiC = np.zeros((total_length, total_length)).astype(np.int16)
     percentage_finish = 0
     for i in range(0, len(infile)):
-        if (i %  (len(infile) / 10)== 0):
-            print ('finish ', percentage_finish, '%')
+        if (i % (len(infile) / 10) == 0):
+            print('finish ', percentage_finish, '%')
             percentage_finish += 10
-        nums = infile[i].split('\t')
-        x = int(nums[0])
-        y = int(nums[1])
-        val = int(float(nums[2]))
-
-        HiC[x][y] = val
-        HiC[y][x] = val
+        nums = infile[i].split(delimiter)
+        try: 
+            x = int(int(nums[0])/resolution)
+            y = int(int(nums[1])/resolution)
+            val = int(float(nums[2]))
+        except ValueError or NameError:
+            pass
+        else:
+            HiC[x][y] = val
+            HiC[y][x] = val
+    print(HiC.shape)
     return HiC
 
-def readSquareMatrix(filename, total_length):
-    print ("reading Rao's HiC ")
-    infile = open(filename).readlines()
-    print('size of matrix is ' + str(len(infile)))
-    print('number of the bins based on the length of chromsomes is ' + str(total_length) )
+
+def readSquareMatrix(infile, total_length, delimiter):
+    #print "reading Rao's HiC "
+    #infile = open(filename).readlines()
+    #print('size of matrix is ' + str(len(infile)))
+    print('number of the bins based on the length of chromsomes is ' + str(total_length))
     result = []
     for line in infile:
-        tokens = line.split(" ")
-        tokens2=[]
-        for item in tokens:
-            k = float(item)
-            tokens2.append(k)
-        line_int = list(map(int, tokens2))
+        tokens = line.split(delimiter)
+        line_num = list(map(float, tokens))
+        line_int = list(map(round, line_num))
         result.append(line_int)
     result = np.array(result)
     print(result.shape)
     return result
 
 
-def divide(HiCfile):
+def divide(HiCmatrix,chrN):
     subImage_size = 40
     step = 25
-    chrs_length = [195471971,182113224,160039680,156508116,151834684,149736546,145441459,129401213,124595110,130694993,122082543,120129022,120421639,124902244,104043685,98207768,94987271,90702639,61431566]
-    input_resolution = 10000
     result = []
     index = []
-    chrN = 19
-    matrix_name = HiCfile + '_npy_form_tmp.npy'
-    if os.path.exists(matrix_name):
-        print ('loading ', matrix_name)
-        HiCsample = np.load(matrix_name)
-    else:
-        print (matrix_name, 'not exist, creating')
-        print (HiCfile)
-        HiCsample = readSquareMatrix(HiCfile, (chrs_length[chrN-1]/input_resolution + 1))
-        #HiCsample = np.loadtxt('/home/zhangyan/private_data/IMR90.nodup.bam.chr'+str(chrN)+'.10000.matrix', dtype=np.int16)
-        print (HiCsample.shape)
-        np.save(matrix_name, HiCsample)
-    print (HiCsample.shape)
-    path = 'HiCPlus_pytorch_production/'
-    if not os.path.exists(path):
-        os.makedirs(path)
-    total_loci = HiCsample.shape[0]
+    #chrN = 21  ##need to change.
+
+    total_loci = HiCmatrix.shape[0]
     for i in range(0, total_loci, step):
         for j in range(0, total_loci, ):
-            if (abs(i-j) > 201 or i + subImage_size >= total_loci or j + subImage_size >= total_loci):
+            if (abs(i - j) > 201 or i + subImage_size >= total_loci or j + subImage_size >= total_loci):
                 continue
-            subImage = HiCsample[i:i+subImage_size, j:j+subImage_size]
+            subImage = HiCmatrix[i:i + subImage_size, j:j + subImage_size]
 
-            result.append([subImage,])
+            result.append([subImage, ])
             tag = 'test'
             index.append((tag, chrN, i, j))
     result = np.array(result)
-    print (result.shape)
+    print(result.shape)
     result = result.astype(np.double)
     index = np.array(index)
     return result, index
+
+def genDownsample(original_sample, rate):
+    result = np.zeros(original_sample.shape).astype(float)
+    for i in range(0, original_sample.shape[0]):
+        for j in range(0, original_sample.shape[1]):
+            for k in range(0, int(original_sample[i][j])):
+                if (random.random() < rate):
+                    result[i][j] += 1
+    return result
 
 
 if __name__ == "__main__":

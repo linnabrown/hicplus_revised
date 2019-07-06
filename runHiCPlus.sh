@@ -1,0 +1,3 @@
+#python runHiCPlus.py --compare_matrix /ibgpu01/huangle/deepHP/txt_data/divided_matrix/MY_113.MY_115/MY_113.MY_115.19.npy --input_matrix /ibgpu01/huangle/deepHP/txt_data/divided_matrix/MY_113.MY_115_simulation1_seed1558030855_frac125/MY_113.MY_115_simulation1_seed1558030855_frac125.19.npy --output_dir HiCPlus_pytorch_production --model ../model/pytorch_HindIII_model_40000 --chrN 19
+python runHiCPlus.py --compare_matrix /ibgpu01/huangle/deepHP/HiCPlus_pytorch/src/ligang_data/high.19.mat.npy --input_matrix /ibgpu01/huangle/deepHP/HiCPlus_pytorch/src/ligang_data/low.19.mat.npy --output_dir ligang_output --model ../model/pytorch_HindIII_model_40000 --chrN 19
+

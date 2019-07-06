@@ -13,17 +13,17 @@ import argparse
 import trainConvNet
 import numpy as np
 
-chrs_length = [249250621,243199373,198022430,191154276,180915260,171115067,159138663,146364022,141213431,135534747,135006516,133851895,115169878,107349540,102531392,90354753,81195210,78077248,59128983,63025520,48129895,51304566]
+chrs_length = [195471971,182113224,160039680,156508116,151834684,149736546,145441459,129401213,124595110,130694993,122082543,120129022,120421639,124902244,104043685,98207768,94987271,90702639,61431566]
 input_resolution = 10000
-#chrN = 21
-#scale = 16
+chrN = 19
+scale = 16
 
 
 parser = argparse.ArgumentParser(description='PyTorch Super Res Example')
 parser.add_argument('--input_file', type=str, required=True, help='input training matrix data')
-parser.add_argument('--chrN', type=int, required=True, help='chromosome used to train')
+# parser.add_argument('--chrN', type=int, required=True, help='chromosome used to train')
 #parser.add_argument('--output_filename', type=str, help='where to save the output image')
-parser.add_argument('--scale_factor', type=float, required=True, help='factor by which resolution needed')
+# parser.add_argument('--scale_factor', type=float, required=True, help='factor by which resolution needed')
 
 #parser.add_argument('--cuda', action='store_true', help='use cuda')
 opt = parser.parse_args()
@@ -35,8 +35,8 @@ print(opt)
 #    raise Exception("No GPU found, please run without --cuda")
 
 infile = opt.input_file
-chrN = opt.chrN
-scale = opt.scale_factor
+# chrN = opt.chrN
+# scale = opt.scale_factor
 
 highres = utils.readFiles(infile, chrs_length[chrN-1]/input_resolution + 1, input_resolution)
 highres_sub,index = utils.divide(highres,chrN)
@@ -48,7 +48,3 @@ lowres_sub,index = utils.divide(lowres,chrN)
 print(lowres_sub.shape)
 np.save(infile+"lowres",lowres_sub)
 #trainConvNet.train(lowres_sub,highres_sub)
-
-
-
-
